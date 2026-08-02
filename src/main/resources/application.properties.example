@@ -1,0 +1,8 @@
+spring.application.name=ai-core-service
+
+spring.datasource.url=jdbc:postgresql://<host>/<database>?sslmode=require
+spring.datasource.username=<user>
+spring.datasource.password=<password>
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
