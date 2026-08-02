@@ -1,5 +1,6 @@
 package com.kbeauty.aicore.controller;
 
+import com.kbeauty.aicore.amqp.DiagnosticEventPublisher;
 import com.kbeauty.aicore.entity.DiagnosticRequest;
 import com.kbeauty.aicore.repository.DiagnosticRequestRepository;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,16 +13,20 @@ import java.util.List;
 public class DiagnosticController {
 
     private final DiagnosticRequestRepository repository;
+    private final DiagnosticEventPublisher publisher;
 
-    public DiagnosticController(DiagnosticRequestRepository repository) {
+    public DiagnosticController(DiagnosticRequestRepository repository, DiagnosticEventPublisher publisher) {
         this.repository = repository;
+        this.publisher = publisher;
     }
 
     @PostMapping("/diagnostics")
     public DiagnosticRequest create() {
         DiagnosticRequest diagnostic = new DiagnosticRequest();
         diagnostic.setStatus("pending");
-        return repository.save(diagnostic);
+        DiagnosticRequest saved = repository.save(diagnostic);
+        publisher.publishDiagnosticCreated(saved.getId());
+        return saved;
     }
 
     @GetMapping("/diagnostics")
