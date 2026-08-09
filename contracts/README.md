@@ -27,6 +27,5 @@ avec :
 
 - `rabbitmq/diagnostic-created.schema.json` — événement `diagnostic.created`
   (exchange `kbeauty.exchange`, routing key `diagnostic.created`), publié par
-  `DiagnosticEventPublisher` à chaque `POST /diagnostics` et
-  `POST /diagnostics/analyze`, consommé côté Laravel par la commande Artisan
-  `rabbitmq:consume-diagnostic-created`.
+  `DiagnosticEventPublisher` à chaque `POST /diagnostics`, consommé côté
+  Laravel par la commande Artisan `rabbitmq:consume-diagnostic-created`.
