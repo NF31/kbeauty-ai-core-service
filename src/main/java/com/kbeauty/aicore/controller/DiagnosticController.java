@@ -25,7 +25,7 @@ public class DiagnosticController {
         DiagnosticRequest diagnostic = new DiagnosticRequest();
         diagnostic.setStatus("pending");
         DiagnosticRequest saved = repository.save(diagnostic);
-        publisher.publishDiagnosticCreated(saved.getId());
+        publisher.publishDiagnosticCreated(saved.getId(), saved.getStatus());
         return saved;
     }
 
