@@ -38,6 +38,11 @@ Journal pedagogique detaille (une entree par etape) dans [`docs/`](docs/README.m
   **DiagnosticEventListener.java** : publication + consommation d'un evenement
   `diagnostic.created` sur RabbitMQ, decouple du controleur.
 - **controller/HealthController.java** : `GET /hello`, route de sante d'origine, conservee.
+- **contracts/rabbitmq/diagnostic-created.schema.json** + **amqp/DiagnosticCreatedEvent.java**,
+  **DiagnosticCreatedEventSchemaValidator.java** : le message RabbitMQ est
+  desormais du JSON structure valide contre un contrat versionne (Axe hors
+  programme 1, voir [docs/04-contrat-donnees-json-schema.md](docs/04-contrat-donnees-json-schema.md)),
+  pas une string libre.
 - Encore a faire : contrat OpenAPI/Swagger (Springdoc) — seul item Phase 2 restant.
 
 ## Comment lancer le serveur (a faire toi-meme dans le terminal WSL)
