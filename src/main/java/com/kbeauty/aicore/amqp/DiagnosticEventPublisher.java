@@ -8,17 +8,26 @@ import org.springframework.stereotype.Component;
 public class DiagnosticEventPublisher {
 
     private final RabbitTemplate rabbitTemplate;
+    private final DiagnosticCreatedEventSchemaValidator validator;
 
-    public DiagnosticEventPublisher(RabbitTemplate rabbitTemplate) {
+    public DiagnosticEventPublisher(RabbitTemplate rabbitTemplate, DiagnosticCreatedEventSchemaValidator validator) {
         this.rabbitTemplate = rabbitTemplate;
+        this.validator = validator;
     }
 
-    public void publishDiagnosticCreated(Long diagnosticId) {
-        String message = "Diagnostic created: id=" + diagnosticId;
+    /**
+     * Valide l'evenement contre contracts/rabbitmq/diagnostic-created.schema.json
+     * avant publication : un changement de champ qui casserait le contrat
+     * echoue ici (InvalidEventException), pas silencieusement chez le
+     * consommateur Laravel.
+     */
+    public void publishDiagnosticCreated(Long diagnosticId, String status) {
+        DiagnosticCreatedEvent event = DiagnosticCreatedEvent.of(diagnosticId, status);
+        validator.validate(event);
         rabbitTemplate.convertAndSend(
                 RabbitMQConfig.EXCHANGE_NAME,
                 RabbitMQConfig.ROUTING_KEY,
-                message
+                event
         );
     }
 }

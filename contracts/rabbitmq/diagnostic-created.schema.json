@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kbeauty.internal/contracts/rabbitmq/diagnostic-created.schema.json",
+  "title": "diagnostic.created",
+  "description": "Evenement publie par kbeauty-ai-core-service (exchange kbeauty.exchange, routing key diagnostic.created) a chaque creation ou mise a jour d'un DiagnosticRequest. Consomme par kbeauty-shop (Laravel).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["eventType", "diagnosticId", "status", "occurredAt"],
+  "properties": {
+    "eventType": {
+      "type": "string",
+      "const": "diagnostic.created",
+      "description": "Fixe volontairement : meme si un seul type d'evenement transite sur cette queue aujourd'hui, le champ evite une ambiguite si l'exchange transporte plusieurs types plus tard."
+    },
+    "diagnosticId": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Identifiant DiagnosticRequest cote Neon (meme table lue par kbeauty-ai-core-service et kbeauty-shop)."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "completed"],
+      "description": "pending : cree via POST /diagnostics, analyse pas encore lancee. completed : cree via POST /diagnostics/analyze, analyse vision deja disponible."
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Horodatage ISO-8601 UTC de la publication de l'evenement (pas forcement celui de la creation en base, meme si les deux coincident aujourd'hui)."
+    }
+  }
+}
