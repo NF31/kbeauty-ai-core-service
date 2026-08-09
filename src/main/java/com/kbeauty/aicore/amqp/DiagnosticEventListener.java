@@ -12,7 +12,8 @@ public class DiagnosticEventListener {
     private static final Logger logger = LoggerFactory.getLogger(DiagnosticEventListener.class);
 
     @RabbitListener(queues = RabbitMQConfig.QUEUE_NAME)
-    public void handleDiagnosticCreated(String message) {
-        logger.info("Message recu depuis RabbitMQ: {}", message);
+    public void handleDiagnosticCreated(DiagnosticCreatedEvent event) {
+        logger.info("Evenement recu depuis RabbitMQ : diagnosticId={}, status={}, occurredAt={}",
+                event.diagnosticId(), event.status(), event.occurredAt());
     }
 }
