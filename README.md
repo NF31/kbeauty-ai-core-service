@@ -26,7 +26,7 @@ Journal pedagogique detaille (une entree par etape) dans [`docs/`](docs/README.m
 
 ## Ce qui a ete fait (Phase 2 de la roadmap montee en competence)
 
-- **pom.xml** : Spring Boot 21, `spring-boot-starter-web`, `spring-boot-starter-data-jpa`,
+- **pom.xml** : Spring Boot 3.4.1 (Java 21), `spring-boot-starter-web`, `spring-boot-starter-data-jpa`,
   `spring-boot-starter-amqp`, driver PostgreSQL (connexion Neon).
 - **entity/DiagnosticRequest.java** + **repository/DiagnosticRequestRepository.java** :
   une entite JPA simple (`status`, horodatage) persistee dans Neon via
