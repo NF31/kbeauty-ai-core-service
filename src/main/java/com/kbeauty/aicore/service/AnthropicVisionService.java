@@ -2,9 +2,9 @@ package com.kbeauty.aicore.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
 
 import java.util.Base64;
 import java.util.LinkedHashMap;
@@ -23,25 +23,20 @@ import java.util.regex.Pattern;
 @Service
 public class AnthropicVisionService {
 
-    private static final String ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
-    private static final String ANTHROPIC_VERSION = "2023-06-01";
-
     // Cherche le premier bloc JSON dans la reponse, au cas ou Claude
     // l'entoure de balises markdown (```json ... ```) malgre le prompt.
     private static final Pattern JSON_BLOCK = Pattern.compile("\\{.*}", Pattern.DOTALL);
 
-    private final RestClient restClient;
+    private final AnthropicApiClient apiClient;
     private final ObjectMapper objectMapper;
-    private final String apiKey;
     private final String model;
 
     public AnthropicVisionService(
-            @Value("${anthropic.api.key}") String apiKey,
+            AnthropicApiClient apiClient,
             @Value("${anthropic.model:claude-sonnet-5}") String model
     ) {
-        this.apiKey = apiKey;
+        this.apiClient = apiClient;
         this.model = model;
-        this.restClient = RestClient.create();
         this.objectMapper = new ObjectMapper();
     }
 
@@ -51,16 +46,15 @@ public class AnthropicVisionService {
 
         JsonNode response;
         try {
-            response = restClient.post()
-                    .uri(ANTHROPIC_API_URL)
-                    .header("x-api-key", apiKey)
-                    .header("anthropic-version", ANTHROPIC_VERSION)
-                    .header("content-type", "application/json")
-                    .body(requestBody)
-                    .retrieve()
-                    .body(JsonNode.class);
+            response = apiClient.call(requestBody);
+        } catch (CallNotPermittedException e) {
+            // Circuit ouvert (trop d'echecs recents) : appel refuse sans
+            // meme toucher le reseau, voir
+            // resilience4j.circuitbreaker.instances.anthropicVision.
+            throw new AnthropicVisionException(
+                    "Service Anthropic temporairement suspendu (trop d'echecs recents), reessaie dans quelques instants", e);
         } catch (Exception e) {
-            throw new AnthropicVisionException("Appel a l'API Anthropic echoue", e);
+            throw new AnthropicVisionException("Appel a l'API Anthropic echoue apres tentatives de retry", e);
         }
 
         String text = extractText(response);

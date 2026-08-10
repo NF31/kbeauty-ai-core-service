@@ -6,7 +6,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class AnthropicVisionServiceTest {
 
-    private final AnthropicVisionService service = new AnthropicVisionService("test-key", "claude-sonnet-5");
+    // apiClient a null : parseAnalysis() ne le touche jamais, seul analyze()
+    // en a besoin (couvert separement par AnthropicApiClientResilienceTest).
+    private final AnthropicVisionService service = new AnthropicVisionService(null, "claude-sonnet-5");
 
     @Test
     void parseAnalysis_extraitLeJsonBrut() {
