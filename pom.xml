@@ -46,6 +46,20 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <!-- Circuit breaker + retry sur l'appel a l'API Anthropic (Axe 2
+                 hors programme, voir kbeauty-shop/docs/montee-competence/07-axes-hors-programme.md) -->
+            <groupId>io.github.resilience4j</groupId>
+            <artifactId>resilience4j-spring-boot3</artifactId>
+            <version>2.4.0</version>
+        </dependency>
+        <dependency>
+            <!-- Requis pour que Spring proxy (AOP) les methodes annotees
+                 @CircuitBreaker/@Retry - sans ce starter, les annotations
+                 sont silencieusement ignorees. -->
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <resources>

@@ -47,6 +47,10 @@ Journal pedagogique detaille (une entree par etape) dans [`docs/`](docs/README.m
   (`POST /diagnostics/analyze`) : diagnostic peau reel — une photo envoyee en
   multipart est analysee par l'API vision de Claude (Anthropic), jamais
   ecrite sur disque (voir [docs/05-diagnostic-vision-claude.md](docs/05-diagnostic-vision-claude.md)).
+- **service/AnthropicApiClient.java** : appel HTTP a Anthropic protege par
+  Resilience4j (retry avec backoff exponentiel, puis circuit breaker si les
+  echecs persistent) — Axe 2 hors programme, voir
+  [docs/06-resilience-anthropic.md](docs/06-resilience-anthropic.md).
 - Encore a faire : contrat OpenAPI/Swagger (Springdoc) — seul item Phase 2 restant.
 
 ## Comment lancer le serveur (a faire toi-meme dans le terminal WSL)
