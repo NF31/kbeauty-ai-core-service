@@ -1,7 +1,11 @@
+← [Retour au sommaire](README.md)
+
 # 6. Resilience applicative sur l'appel Anthropic (Axe 2)
 
-Voir [kbeauty-shop/docs/montee-competence/07-axes-hors-programme.md](../../kbeauty-shop/docs/montee-competence/07-axes-hors-programme.md)
-pour le contexte : cet axe avait ete evalue premature le 2026-08-09 (aucun
+Voir `kbeauty-shop/docs/montee-competence/07-axes-hors-programme.md` (repo
+separe, lien texte brut volontaire - un lien Markdown casserait sur GitHub
+puisque ce sont deux arbres Git distincts) pour le contexte : cet axe avait
+ete evalue premature le 2026-08-09 (aucun
 appel API externe n'existait encore sur `main`), debloque par la Phase 5
 (voir [05-diagnostic-vision-claude.md](05-diagnostic-vision-claude.md)) qui
 donne enfin une cible reelle a un circuit breaker/retry : l'appel HTTP a
