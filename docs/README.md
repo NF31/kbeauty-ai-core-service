@@ -40,6 +40,7 @@ regle stricte du langage, pas une convention comme les namespaces PSR-4 en PHP
 2. [Connexion Neon via Hibernate/JPA](02-connexion-neon-jpa.md)
 3. [RabbitMQ (publication d'evenements)](03-rabbitmq-events.md)
 4. [Contrat de donnees (JSON Schema)](04-contrat-donnees-json-schema.md)
+5. [Diagnostic peau reel (vision Claude)](05-diagnostic-vision-claude.md)
 
 ## Pourquoi faut-il relancer le serveur a chaque modification de code ?
 
