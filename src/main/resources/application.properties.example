@@ -11,3 +11,9 @@ spring.rabbitmq.host=localhost
 spring.rabbitmq.port=5672
 spring.rabbitmq.username=guest
 spring.rabbitmq.password=guest
+
+anthropic.api.key=<votre cle Anthropic, sk-ant-...>
+anthropic.model=claude-sonnet-5
+
+spring.servlet.multipart.max-file-size=8MB
+spring.servlet.multipart.max-request-size=8MB

@@ -43,6 +43,10 @@ Journal pedagogique detaille (une entree par etape) dans [`docs/`](docs/README.m
   desormais du JSON structure valide contre un contrat versionne (Axe hors
   programme 1, voir [docs/04-contrat-donnees-json-schema.md](docs/04-contrat-donnees-json-schema.md)),
   pas une string libre.
+- **service/AnthropicVisionService.java** + **controller/DiagnosticController.java**
+  (`POST /diagnostics/analyze`) : diagnostic peau reel — une photo envoyee en
+  multipart est analysee par l'API vision de Claude (Anthropic), jamais
+  ecrite sur disque (voir [docs/05-diagnostic-vision-claude.md](docs/05-diagnostic-vision-claude.md)).
 - Encore a faire : contrat OpenAPI/Swagger (Springdoc) — seul item Phase 2 restant.
 
 ## Comment lancer le serveur (a faire toi-meme dans le terminal WSL)
