@@ -41,6 +41,7 @@ regle stricte du langage, pas une convention comme les namespaces PSR-4 en PHP
 3. [RabbitMQ (publication d'evenements)](03-rabbitmq-events.md)
 4. [Contrat de donnees (JSON Schema)](04-contrat-donnees-json-schema.md)
 5. [Diagnostic peau reel (vision Claude)](05-diagnostic-vision-claude.md)
+6. [Resilience applicative sur l'appel Anthropic (retry + circuit breaker)](06-resilience-anthropic.md)
 
 ## Pourquoi faut-il relancer le serveur a chaque modification de code ?
 

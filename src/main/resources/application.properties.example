@@ -17,3 +17,31 @@ anthropic.model=claude-sonnet-5
 
 spring.servlet.multipart.max-file-size=8MB
 spring.servlet.multipart.max-request-size=8MB
+
+# Resilience4j sur l'appel a l'API Anthropic (Axe 2 hors programme, voir
+# kbeauty-shop/docs/montee-competence/07-axes-hors-programme.md). Retry
+# doit envelopper le circuit breaker (pas l'inverse) : chaque tentative de
+# retry passe ainsi par le circuit breaker, et un circuit ouvert fait
+# echouer les tentatives restantes immediatement (CallNotPermittedException)
+# plutot que d'attendre un backoff exponentiel pour rien.
+resilience4j.retry.retry-aspect-order=1
+resilience4j.circuitbreaker.circuit-breaker-aspect-order=2
+
+resilience4j.retry.instances.anthropicVision.max-attempts=3
+resilience4j.retry.instances.anthropicVision.wait-duration=1s
+resilience4j.retry.instances.anthropicVision.enable-exponential-backoff=true
+resilience4j.retry.instances.anthropicVision.exponential-backoff-multiplier=2
+# 4xx (cle invalide, credit insuffisant, image rejetee...) ne se resout pas
+# en reessayant ; CallNotPermittedException = circuit deja ouvert, retenter
+# ne ferait qu'attendre le backoff pour un echec certain.
+resilience4j.retry.instances.anthropicVision.ignore-exceptions=org.springframework.web.client.HttpClientErrorException,io.github.resilience4j.circuitbreaker.CallNotPermittedException
+
+resilience4j.circuitbreaker.instances.anthropicVision.sliding-window-type=count-based
+resilience4j.circuitbreaker.instances.anthropicVision.sliding-window-size=10
+resilience4j.circuitbreaker.instances.anthropicVision.minimum-number-of-calls=5
+resilience4j.circuitbreaker.instances.anthropicVision.failure-rate-threshold=50
+resilience4j.circuitbreaker.instances.anthropicVision.wait-duration-in-open-state=30s
+resilience4j.circuitbreaker.instances.anthropicVision.permitted-number-of-calls-in-half-open-state=3
+# Meme raison que pour le retry : un 4xx est une erreur du client (nous),
+# pas un signe que l'API Anthropic elle-meme est en mauvaise sante.
+resilience4j.circuitbreaker.instances.anthropicVision.ignore-exceptions=org.springframework.web.client.HttpClientErrorException
