@@ -67,6 +67,11 @@ public class DiagnosticController {
      * transferTo()) - seuls le texte d'analyse et les scores anonymises
      * sont persistes sur DiagnosticRequest.
      */
+    // Plusieurs .body(Map.of(...))/ResponseEntity.ok(Map.of(...)) ci-dessous
+    // (dont saved.getId(), un Long, en valeur) : memes constructeurs/methodes
+    // generiques @NonNull de spring-web que les autres suppressions de ce
+    // repo (RestClient/ResponseEntity), faux positif JDT.
+    @SuppressWarnings("null")
     @PostMapping("/diagnostics/analyze")
     public ResponseEntity<?> analyze(
             @RequestParam("image") MultipartFile image,

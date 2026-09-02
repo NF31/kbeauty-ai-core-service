@@ -41,6 +41,10 @@ public class AnthropicApiClient {
      * ne ferait que retarder un echec certain et fausser la mesure de
      * sante du circuit breaker.
      */
+    // .body(requestBody) plus bas : RestClient.RequestBodySpec#body(Object)
+    // (spring-web, parametre @NonNull) recoit une Map non annotee - meme
+    // famille de faux positif JDT que les autres suppressions de ce repo.
+    @SuppressWarnings("null")
     @Retry(name = "anthropicVision")
     @CircuitBreaker(name = "anthropicVision")
     public JsonNode call(Map<String, Object> requestBody) {
