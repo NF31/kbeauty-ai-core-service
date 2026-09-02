@@ -8,6 +8,10 @@ class AnthropicVisionServiceTest {
 
     // apiClient a null : parseAnalysis() ne le touche jamais, seul analyze()
     // en a besoin (couvert separement par AnthropicApiClientResilienceTest).
+    // AnthropicApiClient n'est pas annote @Nullable, d'ou l'avertissement
+    // JDT sur ce null litteral volontaire - @SuppressWarnings car c'est
+    // exactement le comportement recherche ici, pas une erreur.
+    @SuppressWarnings("null")
     private final AnthropicVisionService service = new AnthropicVisionService(null, "claude-sonnet-5");
 
     @Test

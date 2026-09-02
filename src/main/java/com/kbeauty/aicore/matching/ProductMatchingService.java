@@ -40,6 +40,13 @@ public class ProductMatchingService {
      * DiagnosticController sait deja se replier sur son ancienne
      * selection par skin_type si cette liste est vide.
      */
+    // ProductMatch::productId utilise comme Function<ProductMatch, Long> plus
+    // bas : ProductMatch (record local, non annote) ne fournit pas de
+    // garantie @NonNull explicite a JDT dans ce contexte generique - meme
+    // famille de faux positif que les autres suppressions de ce repo, aucun
+    // element de la liste retournee par findClosestPublishedProducts()
+    // n'est jamais null.
+    @SuppressWarnings("null")
     public List<Long> recommendProducts(SkinAnalysisResult analysis) {
         try {
             float[] queryEmbedding = voyageClient.embedQuery(buildQueryText(analysis));
