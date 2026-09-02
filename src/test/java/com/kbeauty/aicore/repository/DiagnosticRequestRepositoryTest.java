@@ -40,6 +40,10 @@ class DiagnosticRequestRepositoryTest {
         assertThat(reloaded.get().getScoresJson()).isEqualTo("{\"rougeurs\":30,\"hydratation\":70}");
     }
 
+    // DiagnosticRequest::getStatus utilise comme Function<DiagnosticRequest, String>
+    // via AssertJ .extracting() ci-dessous : meme faux positif JDT que les
+    // autres suppressions de ce repo.
+    @SuppressWarnings("null")
     @Test
     void findAll_retourneTousLesDiagnostiquesPersistes() {
         DiagnosticRequest pending = new DiagnosticRequest();

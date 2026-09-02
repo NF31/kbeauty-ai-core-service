@@ -49,6 +49,13 @@ public class RabbitMQConfig {
      * ObjectMapper) semblerait passer. Bug reproduit en conditions reelles
      * (curl + inspection du message cote consommateur Laravel) avant ce fix.
      */
+    // ObjectMapper (Jackson, non annote) vers le constructeur de
+    // Jackson2JsonMessageConverter (spring-amqp, parametre @NonNull) : meme
+    // famille de faux positif JDT que les suppressions de
+    // DiagnosticControllerTest (type legacy non annote passant un parametre
+    // @NonNull d'une lib Spring) - le bean est bien fourni par Spring, jamais
+    // null en pratique.
+    @SuppressWarnings("null")
     @Bean
     public MessageConverter jsonMessageConverter(ObjectMapper objectMapper) {
         return new Jackson2JsonMessageConverter(objectMapper);
