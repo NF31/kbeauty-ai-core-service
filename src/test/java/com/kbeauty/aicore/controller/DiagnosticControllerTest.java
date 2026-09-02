@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
@@ -33,9 +34,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @WebMvcTest ne charge que la couche web (pas JPA, pas RabbitMQ reel) : le
  * repository, le publisher d'evenements et le service vision sont mockes,
  * seul le routage/serialisation du controller est verifie ici.
+ *
+ * InternalApiKeyFilter (@Component implements Filter) est inclus dans ce
+ * slice comme n'importe quel bean Filter - @TestPropertySource fixe une
+ * cle de test, et chaque appel ci-dessous doit envoyer le header
+ * correspondant pour passer le filtre (voir aussi
+ * refuse401SansLeHeaderDeCleInterne, qui verifie l'inverse).
  */
 @WebMvcTest(DiagnosticController.class)
+@TestPropertySource(properties = "internal.api.key=test-secret")
 class DiagnosticControllerTest {
+
+    private static final String INTERNAL_KEY_HEADER = "X-Internal-Api-Key";
 
     @Autowired
     private MockMvc mockMvc;
@@ -71,7 +81,7 @@ class DiagnosticControllerTest {
             return arg;
         });
 
-        mockMvc.perform(post("/diagnostics"))
+        mockMvc.perform(post("/diagnostics").header(INTERNAL_KEY_HEADER, "test-secret"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.status").value("pending"));
@@ -90,11 +100,22 @@ class DiagnosticControllerTest {
         second.setStatus("completed");
         when(repository.findAll()).thenReturn(List.of(first, second));
 
-        mockMvc.perform(get("/diagnostics"))
+        mockMvc.perform(get("/diagnostics").header(INTERNAL_KEY_HEADER, "test-secret"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].status").value("pending"))
                 .andExpect(jsonPath("$[1].status").value("completed"));
+    }
+
+    // InternalApiKeyFilter (voir la Javadoc de cette classe) : sans le
+    // header, le controller n'est jamais atteint - 401 avant meme le
+    // routage, et le repository (mocke) ne doit voir aucun appel.
+    @Test
+    void list_refuse401SansLeHeaderDeCleInterne() throws Exception {
+        mockMvc.perform(get("/diagnostics"))
+                .andExpect(status().isUnauthorized());
+
+        verifyNoInteractions(repository);
     }
 
     // Voir le commentaire sur create_enregistreUnDiagnosticEnAttenteEtPublieLevenement().
@@ -114,6 +135,7 @@ class DiagnosticControllerTest {
 
         mockMvc.perform(multipart("/diagnostics/analyze")
                         .file(image)
+                        .header(INTERNAL_KEY_HEADER, "test-secret")
                         .param("skin_type", "mixte"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(42))
@@ -135,6 +157,7 @@ class DiagnosticControllerTest {
 
         mockMvc.perform(multipart("/diagnostics/analyze")
                         .file(image)
+                        .header(INTERNAL_KEY_HEADER, "test-secret")
                         .param("skin_type", "mixte"))
                 .andExpect(status().isBadGateway())
                 .andExpect(jsonPath("$.error").value("Analyse IA indisponible"));
