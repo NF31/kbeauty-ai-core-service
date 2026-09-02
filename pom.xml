@@ -47,6 +47,16 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <!-- Base embarquee pour @DataJpaTest (DiagnosticRequestRepositoryTest) :
+                 aucune config a fournir, Spring Boot detecte h2 sur le classpath
+                 et remplace automatiquement le datasource Postgres par une base
+                 en memoire le temps du test - jamais de connexion a Neon depuis
+                 les tests. -->
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <!-- Circuit breaker + retry sur l'appel a l'API Anthropic (Axe 2
                  hors programme, voir kbeauty-shop/docs/montee-competence/07-axes-hors-programme.md) -->
             <groupId>io.github.resilience4j</groupId>
