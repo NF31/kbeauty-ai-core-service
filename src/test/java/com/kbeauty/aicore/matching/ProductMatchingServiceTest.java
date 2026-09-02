@@ -39,6 +39,10 @@ class ProductMatchingServiceTest {
                 .contains("rougeurs : 30/100, hydratation : 55/100, eclat : 80/100");
     }
 
+    // containsExactly(12L, 7L) plus bas : AssertJ infere un Function generique
+    // @NonNull sur ces Long boxes - meme famille de faux positif JDT que les
+    // autres suppressions de ce repo.
+    @SuppressWarnings("null")
     @Test
     void recommendProducts_retourneLesIdsTriesParSimilarite() {
         SkinAnalysisResult analysis = new SkinAnalysisResult(Map.of("rougeurs", 30), "Peau sensible.");

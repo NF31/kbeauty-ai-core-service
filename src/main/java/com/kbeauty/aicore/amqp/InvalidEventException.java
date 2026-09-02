@@ -12,6 +12,10 @@ import java.util.stream.Collectors;
  */
 public class InvalidEventException extends RuntimeException {
 
+    // ValidationMessage::getMessage utilise comme Function<ValidationMessage, String>
+    // ci-dessous : meme faux positif JDT que les autres suppressions de ce
+    // repo (type d'une lib tierce non annote dans un contexte generique).
+    @SuppressWarnings("null")
     public InvalidEventException(Set<ValidationMessage> errors) {
         super("Evenement invalide au regard du contrat JSON Schema : "
                 + errors.stream().map(ValidationMessage::getMessage).collect(Collectors.joining("; ")));
