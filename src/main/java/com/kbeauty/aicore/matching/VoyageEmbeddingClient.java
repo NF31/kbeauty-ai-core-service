@@ -39,6 +39,10 @@ public class VoyageEmbeddingClient {
      * - melanger les deux fausse la similarite (voir
      * kbeauty-shop/docs/montee-competence/11-embeddings-rag-pgvector.md).
      */
+    // .body(Map<String,Object>) plus bas : RestClient.RequestBodySpec#body(Object)
+    // (spring-web, parametre @NonNull) recoit une Map non annotee - meme
+    // famille de faux positif JDT que les autres suppressions de ce repo.
+    @SuppressWarnings("null")
     public float[] embedQuery(String text) {
         Map<String, Object> body = Map.of(
                 "input", List.of(text),

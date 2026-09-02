@@ -130,6 +130,10 @@ class AnthropicApiClientResilienceTest {
         });
     }
 
+    // MockRestServiceServer.bindTo(RestClient.Builder) plus bas (spring-test,
+    // parametre @NonNull) recoit un RestClient.Builder non annote - meme
+    // famille de faux positif JDT que les autres suppressions de ce repo.
+    @SuppressWarnings("null")
     @Configuration
     static class TestConfig {
 

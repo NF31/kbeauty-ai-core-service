@@ -52,6 +52,14 @@ class DiagnosticControllerTest {
     @MockitoBean
     private ProductMatchingService matchingService;
 
+    // Mockito.any(Class) est statiquement typé T mais renvoie null au runtime
+    // (matcher, pas une vraie valeur) ; JpaRepository#save(S) est annoté
+    // @NonNull par Spring Data. JDT (analyse de nullité de l'extension Java
+    // VSCode) voit donc un T "non-null" transiter vers un paramètre @NonNull
+    // et signale un faux positif ("needs unchecked conversion") sur les deux
+    // méthodes ci-dessous - Mockito résout bien any() au runtime, rien à
+    // corriger fonctionnellement.
+    @SuppressWarnings("null")
     @Test
     void create_enregistreUnDiagnosticEnAttenteEtPublieLevenement() throws Exception {
         when(repository.save(any(DiagnosticRequest.class))).thenAnswer(invocation -> {
@@ -89,6 +97,8 @@ class DiagnosticControllerTest {
                 .andExpect(jsonPath("$[1].status").value("completed"));
     }
 
+    // Voir le commentaire sur create_enregistreUnDiagnosticEnAttenteEtPublieLevenement().
+    @SuppressWarnings("null")
     @Test
     void analyze_retourneLanalyseEtLesScoresQuandLappelAnthropicReussit() throws Exception {
         SkinAnalysisResult result = new SkinAnalysisResult(Map.of("rougeurs", 30, "hydratation", 70), "Peau plutot equilibree.");
