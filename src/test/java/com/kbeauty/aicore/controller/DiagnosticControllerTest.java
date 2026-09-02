@@ -2,6 +2,7 @@ package com.kbeauty.aicore.controller;
 
 import com.kbeauty.aicore.amqp.DiagnosticEventPublisher;
 import com.kbeauty.aicore.entity.DiagnosticRequest;
+import com.kbeauty.aicore.matching.ProductMatchingService;
 import com.kbeauty.aicore.repository.DiagnosticRequestRepository;
 import com.kbeauty.aicore.service.AnthropicVisionException;
 import com.kbeauty.aicore.service.AnthropicVisionService;
@@ -48,6 +49,9 @@ class DiagnosticControllerTest {
     @MockitoBean
     private AnthropicVisionService visionService;
 
+    @MockitoBean
+    private ProductMatchingService matchingService;
+
     @Test
     void create_enregistreUnDiagnosticEnAttenteEtPublieLevenement() throws Exception {
         when(repository.save(any(DiagnosticRequest.class))).thenAnswer(invocation -> {
@@ -89,6 +93,7 @@ class DiagnosticControllerTest {
     void analyze_retourneLanalyseEtLesScoresQuandLappelAnthropicReussit() throws Exception {
         SkinAnalysisResult result = new SkinAnalysisResult(Map.of("rougeurs", 30, "hydratation", 70), "Peau plutot equilibree.");
         when(visionService.analyze(any(byte[].class), eq("image/png"), eq("mixte"))).thenReturn(result);
+        when(matchingService.recommendProducts(result)).thenReturn(List.of(12L, 7L));
         when(repository.save(any(DiagnosticRequest.class))).thenAnswer(invocation -> {
             DiagnosticRequest arg = invocation.getArgument(0);
             ReflectionTestUtils.setField(arg, "id", 42L);
@@ -104,7 +109,9 @@ class DiagnosticControllerTest {
                 .andExpect(jsonPath("$.id").value(42))
                 .andExpect(jsonPath("$.status").value("completed"))
                 .andExpect(jsonPath("$.analysis").value("Peau plutot equilibree."))
-                .andExpect(jsonPath("$.scores.rougeurs").value(30));
+                .andExpect(jsonPath("$.scores.rougeurs").value(30))
+                .andExpect(jsonPath("$.recommendedProductIds[0]").value(12))
+                .andExpect(jsonPath("$.recommendedProductIds[1]").value(7));
 
         verify(publisher).publishDiagnosticCreated(eq(42L), eq("completed"));
     }
@@ -123,8 +130,10 @@ class DiagnosticControllerTest {
                 .andExpect(jsonPath("$.error").value("Analyse IA indisponible"));
 
         // Un echec cote Anthropic ne doit ni creer de ligne DiagnosticRequest
-        // ni publier sur RabbitMQ - le controller doit s'arreter avant.
+        // ni publier sur RabbitMQ ni tenter de matcher des produits - le
+        // controller doit s'arreter avant.
         verifyNoInteractions(repository);
         verifyNoInteractions(publisher);
+        verifyNoInteractions(matchingService);
     }
 }
