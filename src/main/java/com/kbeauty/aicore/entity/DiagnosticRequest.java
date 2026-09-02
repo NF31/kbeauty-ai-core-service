@@ -27,6 +27,15 @@ public class DiagnosticRequest {
     @Column(columnDefinition = "TEXT")
     private String scoresJson;
 
+    /**
+     * Liste JSON d'ids `products.id` (kbeauty-shop) recommandes par
+     * ProductMatchingService - vide/absent si le matching a echoue ou
+     * n'a rien trouve (voir ProductMatchingService.recommendProducts,
+     * "best effort" par design).
+     */
+    @Column(columnDefinition = "TEXT")
+    private String recommendedProductIdsJson;
+
     public Long getId() {
         return id;
     }
@@ -53,5 +62,13 @@ public class DiagnosticRequest {
 
     public void setScoresJson(String scoresJson) {
         this.scoresJson = scoresJson;
+    }
+
+    public String getRecommendedProductIdsJson() {
+        return recommendedProductIdsJson;
+    }
+
+    public void setRecommendedProductIdsJson(String recommendedProductIdsJson) {
+        this.recommendedProductIdsJson = recommendedProductIdsJson;
     }
 }

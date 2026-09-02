@@ -15,6 +15,15 @@ spring.rabbitmq.password=guest
 anthropic.api.key=<votre cle Anthropic, sk-ant-...>
 anthropic.model=claude-sonnet-5
 
+# ProductMatchingService : vectorise le diagnostic (analyse + scores) et
+# cherche les produits kbeauty-shop les plus proches dans
+# shop_ingredient_embeddings (meme base Neon, peuplee par
+# `php artisan products:embed-ingredients` cote Laravel). Meme cle que
+# kbeauty-shop/.env et kbeauty-ingredients-scraper/.env - un seul compte
+# Voyage pour les trois usages.
+voyage.api.key=<votre cle Voyage AI, pa-...>
+voyage.model=voyage-3.5
+
 spring.servlet.multipart.max-file-size=8MB
 spring.servlet.multipart.max-request-size=8MB
 

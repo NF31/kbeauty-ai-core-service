@@ -3,6 +3,7 @@ package com.kbeauty.aicore.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kbeauty.aicore.amqp.DiagnosticEventPublisher;
 import com.kbeauty.aicore.entity.DiagnosticRequest;
+import com.kbeauty.aicore.matching.ProductMatchingService;
 import com.kbeauty.aicore.repository.DiagnosticRequestRepository;
 import com.kbeauty.aicore.service.AnthropicVisionException;
 import com.kbeauty.aicore.service.AnthropicVisionService;
@@ -29,17 +30,20 @@ public class DiagnosticController {
     private final DiagnosticRequestRepository repository;
     private final DiagnosticEventPublisher publisher;
     private final AnthropicVisionService visionService;
+    private final ProductMatchingService matchingService;
     private final ObjectMapper objectMapper;
 
     public DiagnosticController(
             DiagnosticRequestRepository repository,
             DiagnosticEventPublisher publisher,
             AnthropicVisionService visionService,
+            ProductMatchingService matchingService,
             ObjectMapper objectMapper
     ) {
         this.repository = repository;
         this.publisher = publisher;
         this.visionService = visionService;
+        this.matchingService = matchingService;
         this.objectMapper = objectMapper;
     }
 
@@ -86,6 +90,8 @@ public class DiagnosticController {
                     .body(Map.of("error", "Analyse IA indisponible"));
         }
 
+        List<Long> recommendedProductIds = matchingService.recommendProducts(result);
+
         DiagnosticRequest diagnostic = new DiagnosticRequest();
         diagnostic.setStatus("completed");
         diagnostic.setAnalysis(result.analysis());
@@ -93,6 +99,11 @@ public class DiagnosticController {
             diagnostic.setScoresJson(objectMapper.writeValueAsString(result.scores()));
         } catch (Exception e) {
             diagnostic.setScoresJson("{}");
+        }
+        try {
+            diagnostic.setRecommendedProductIdsJson(objectMapper.writeValueAsString(recommendedProductIds));
+        } catch (Exception e) {
+            diagnostic.setRecommendedProductIdsJson("[]");
         }
 
         DiagnosticRequest saved = repository.save(diagnostic);
@@ -102,7 +113,8 @@ public class DiagnosticController {
                 "id", saved.getId(),
                 "status", saved.getStatus(),
                 "analysis", result.analysis(),
-                "scores", result.scores()
+                "scores", result.scores(),
+                "recommendedProductIds", recommendedProductIds
         ));
     }
 }
