@@ -27,6 +27,14 @@ voyage.model=voyage-3.5
 spring.servlet.multipart.max-file-size=8MB
 spring.servlet.multipart.max-request-size=8MB
 
+# Secret partage verifie par InternalApiKeyFilter sur toutes les routes
+# /diagnostics/** : ce service n'est jamais appele directement par un
+# navigateur, uniquement en server-to-server par kbeauty-shop
+# (App\Services\AiCoreDiagnosticClient, meme valeur cote Laravel dans
+# config/services.php -> AI_CORE_INTERNAL_KEY). A generer via
+# `openssl rand -hex 32`, jamais commit.
+internal.api.key=<secret partage avec kbeauty-shop>
+
 # Resilience4j sur l'appel a l'API Anthropic (Axe 2 hors programme, voir
 # kbeauty-shop/docs/montee-competence/07-axes-hors-programme.md). Retry
 # doit envelopper le circuit breaker (pas l'inverse) : chaque tentative de
