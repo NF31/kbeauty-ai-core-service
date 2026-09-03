@@ -13,6 +13,11 @@ spring.rabbitmq.username=guest
 spring.rabbitmq.password=guest
 
 anthropic.api.key=<votre cle Anthropic, sk-ant-...>
+# Requis avec une cle Anthropic "identity-linked" (liee a un compte perso via
+# Workload Identity Federation) : sans cet ID, l'API repond 400
+# "anthropic-workspace-id is required...". Non secret, visible dans
+# console.anthropic.com > Settings > Workspaces > (workspace) > URL de la page.
+anthropic.workspace.id=<votre Workspace ID>
 anthropic.model=claude-sonnet-5
 
 # ProductMatchingService : vectorise le diagnostic (analyse + scores) et
