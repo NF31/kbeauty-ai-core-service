@@ -122,7 +122,7 @@ class DiagnosticControllerTest {
     @SuppressWarnings("null")
     @Test
     void analyze_retourneLanalyseEtLesScoresQuandLappelAnthropicReussit() throws Exception {
-        SkinAnalysisResult result = new SkinAnalysisResult(Map.of("rougeurs", 30, "hydratation", 70), "Peau plutot equilibree.");
+        SkinAnalysisResult result = new SkinAnalysisResult(true, Map.of("rougeurs", 30, "hydratation", 70), "Peau plutot equilibree.");
         when(visionService.analyze(any(byte[].class), eq("image/png"), eq("mixte"))).thenReturn(result);
         when(matchingService.recommendProducts(result)).thenReturn(List.of(12L, 7L));
         when(repository.save(any(DiagnosticRequest.class))).thenAnswer(invocation -> {
@@ -141,11 +141,43 @@ class DiagnosticControllerTest {
                 .andExpect(jsonPath("$.id").value(42))
                 .andExpect(jsonPath("$.status").value("completed"))
                 .andExpect(jsonPath("$.analysis").value("Peau plutot equilibree."))
+                .andExpect(jsonPath("$.validPhoto").value(true))
                 .andExpect(jsonPath("$.scores.rougeurs").value(30))
                 .andExpect(jsonPath("$.recommendedProductIds[0]").value(12))
                 .andExpect(jsonPath("$.recommendedProductIds[1]").value(7));
 
         verify(publisher).publishDiagnosticCreated(eq(42L), eq("completed"));
+    }
+
+    // Cas ajoute suite a un test manuel (03/09) : une capture d'ecran soumise
+    // comme "photo de peau" renvoyait quand meme 4 produits generiques -
+    // Claude decrit correctement le probleme dans son texte, mais rien ne
+    // coupait le matching produit derriere. Voir SkinAnalysisResult.validPhoto.
+    @SuppressWarnings("null")
+    @Test
+    void analyze_neMatchePasDeProduitsQuandLaPhotoNestPasUnVisage() throws Exception {
+        SkinAnalysisResult result = new SkinAnalysisResult(false, Map.of(), "Ce n'est pas une photo de visage.");
+        when(visionService.analyze(any(byte[].class), eq("image/png"), eq("mixte"))).thenReturn(result);
+        when(repository.save(any(DiagnosticRequest.class))).thenAnswer(invocation -> {
+            DiagnosticRequest arg = invocation.getArgument(0);
+            ReflectionTestUtils.setField(arg, "id", 43L);
+            return arg;
+        });
+
+        MockMultipartFile image = new MockMultipartFile("image", "capture.png", "image/png", new byte[]{1, 2, 3});
+
+        mockMvc.perform(multipart("/diagnostics/analyze")
+                        .file(image)
+                        .header(INTERNAL_KEY_HEADER, "test-secret")
+                        .param("skin_type", "mixte"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.validPhoto").value(false))
+                .andExpect(jsonPath("$.scores").value(org.hamcrest.Matchers.nullValue()))
+                .andExpect(jsonPath("$.recommendedProductIds.length()").value(0));
+
+        // Le point central de ce test : aucune recherche vectorielle ne doit
+        // etre lancee sur un texte d'erreur.
+        verifyNoInteractions(matchingService);
     }
 
     @Test

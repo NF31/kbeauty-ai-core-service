@@ -63,11 +63,19 @@ public class AnthropicVisionService {
 
     private Map<String, Object> buildRequestBody(String base64Image, String mediaType, String skinType) {
         String prompt = """
-                Tu es un dermatologue virtuel. Analyse cette photo de peau
-                (type de peau declare par l'utilisateur : %s) et reponds
-                UNIQUEMENT avec un objet JSON strict, sans texte autour, au
-                format exact suivant :
-                {"scores": {"rougeurs": <0-100>, "hydratation": <0-100>, "texture": <0-100>, "eclat": <0-100>}, "analysis": "<2-3 phrases en francais, ton bienveillant, conseils concrets>"}
+                Tu es un dermatologue virtuel. Examine d'abord si cette image
+                est bien une photo d'un visage humain reel (pas une capture
+                d'ecran, un dessin, un objet, une photo sans visage visible,
+                etc.). Reponds UNIQUEMENT avec un objet JSON strict, sans
+                texte autour, au format exact suivant :
+
+                Si c'est bien un visage : analyse la peau (type de peau
+                declare par l'utilisateur : %s) et reponds
+                {"valid_photo": true, "scores": {"rougeurs": <0-100>, "hydratation": <0-100>, "texture": <0-100>, "eclat": <0-100>}, "analysis": "<2-3 phrases en francais, ton bienveillant, conseils concrets>"}
+
+                Sinon, ne scores rien et explique pourquoi :
+                {"valid_photo": false, "scores": {}, "analysis": "<1-2 phrases en francais expliquant pourquoi la photo n'est pas exploitable et invitant a en soumettre une nouvelle>"}
+
                 Les scores sont anonymises et ne doivent jamais reference d'elements identifiants de la photo.
                 """.formatted(skinType);
 
@@ -121,12 +129,16 @@ public class AnthropicVisionService {
 
         try {
             JsonNode json = objectMapper.readTree(matcher.group());
+            // Absent (reponse pre-existante au champ, ou modele qui l'oublie
+            // malgre le prompt) => true : ne pas priver retroactivement les
+            // vrais diagnostics de leurs recommandations produit.
+            boolean validPhoto = json.path("valid_photo").asBoolean(true);
             Map<String, Integer> scores = new LinkedHashMap<>();
             json.path("scores").fields().forEachRemaining(entry ->
                     scores.put(entry.getKey(), entry.getValue().asInt())
             );
             String analysis = json.path("analysis").asText();
-            return new SkinAnalysisResult(scores, analysis);
+            return new SkinAnalysisResult(validPhoto, scores, analysis);
         } catch (Exception e) {
             throw new AnthropicVisionException("JSON Claude invalide", e);
         }

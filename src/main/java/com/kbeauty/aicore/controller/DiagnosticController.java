@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -95,7 +96,13 @@ public class DiagnosticController {
                     .body(Map.of("error", "Analyse IA indisponible"));
         }
 
-        List<Long> recommendedProductIds = matchingService.recommendProducts(result);
+        // Pas de matching produit si Claude n'a pas reconnu de visage sur
+        // la photo (result.validPhoto() == false) : chercher des produits
+        // proches d'un texte d'erreur ("ce n'est pas une photo de peau")
+        // n'a aucun sens et renverrait des recommandations trompeuses.
+        List<Long> recommendedProductIds = result.validPhoto()
+                ? matchingService.recommendProducts(result)
+                : List.of();
 
         DiagnosticRequest diagnostic = new DiagnosticRequest();
         diagnostic.setStatus("completed");
@@ -114,12 +121,18 @@ public class DiagnosticController {
         DiagnosticRequest saved = repository.save(diagnostic);
         publisher.publishDiagnosticCreated(saved.getId(), saved.getStatus());
 
-        return ResponseEntity.ok(Map.of(
-                "id", saved.getId(),
-                "status", saved.getStatus(),
-                "analysis", result.analysis(),
-                "scores", result.scores(),
-                "recommendedProductIds", recommendedProductIds
-        ));
+        // Map.of(...) refuse les valeurs null (NPE) - "scores" doit pouvoir
+        // etre null cote JSON (photo invalide) pour que le front distingue
+        // "aucun score" (masque la barre de progression) de "scores a 0"
+        // (peau sans probleme detecte), d'ou ce HashMap plutot que Map.of.
+        Map<String, Object> body = new HashMap<>();
+        body.put("id", saved.getId());
+        body.put("status", saved.getStatus());
+        body.put("analysis", result.analysis());
+        body.put("validPhoto", result.validPhoto());
+        body.put("scores", result.validPhoto() ? result.scores() : null);
+        body.put("recommendedProductIds", recommendedProductIds);
+
+        return ResponseEntity.ok(body);
     }
 }
