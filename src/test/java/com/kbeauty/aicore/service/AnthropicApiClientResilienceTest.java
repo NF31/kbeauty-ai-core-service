@@ -152,7 +152,7 @@ class AnthropicApiClientResilienceTest {
             // mockServer en parametre (non utilise directement) uniquement
             // pour forcer Spring a l'instancier - et donc a lier le mock au
             // builder - avant que ce bean ne construise le RestClient.
-            return new AnthropicApiClient(builder, "test-key");
+            return new AnthropicApiClient(builder, "test-key", "wrkspc_test");
         }
     }
 }
