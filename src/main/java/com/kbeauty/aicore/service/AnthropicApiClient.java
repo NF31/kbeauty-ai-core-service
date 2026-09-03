@@ -26,10 +26,16 @@ public class AnthropicApiClient {
 
     private final RestClient restClient;
     private final String apiKey;
+    private final String workspaceId;
 
-    public AnthropicApiClient(RestClient.Builder restClientBuilder, @Value("${anthropic.api.key}") String apiKey) {
+    public AnthropicApiClient(
+            RestClient.Builder restClientBuilder,
+            @Value("${anthropic.api.key}") String apiKey,
+            @Value("${anthropic.workspace.id}") String workspaceId
+    ) {
         this.restClient = restClientBuilder.build();
         this.apiKey = apiKey;
+        this.workspaceId = workspaceId;
     }
 
     /**
@@ -52,6 +58,7 @@ public class AnthropicApiClient {
                 .uri(ANTHROPIC_API_URL)
                 .header("x-api-key", apiKey)
                 .header("anthropic-version", ANTHROPIC_VERSION)
+                .header("anthropic-workspace-id", workspaceId)
                 .header("content-type", "application/json")
                 .body(requestBody)
                 .retrieve()
