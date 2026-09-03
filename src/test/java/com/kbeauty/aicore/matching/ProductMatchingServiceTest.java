@@ -30,7 +30,7 @@ class ProductMatchingServiceTest {
         scores.put("eclat", 80);
         scores.put("rougeurs", 30);
         scores.put("hydratation", 55);
-        SkinAnalysisResult analysis = new SkinAnalysisResult(scores, "Peau plutot equilibree.");
+        SkinAnalysisResult analysis = new SkinAnalysisResult(true, scores, "Peau plutot equilibree.");
 
         String queryText = service.buildQueryText(analysis);
 
@@ -45,7 +45,7 @@ class ProductMatchingServiceTest {
     @SuppressWarnings("null")
     @Test
     void recommendProducts_retourneLesIdsTriesParSimilarite() {
-        SkinAnalysisResult analysis = new SkinAnalysisResult(Map.of("rougeurs", 30), "Peau sensible.");
+        SkinAnalysisResult analysis = new SkinAnalysisResult(true, Map.of("rougeurs", 30), "Peau sensible.");
         float[] embedding = {0.1f, 0.2f};
         when(voyageClient.embedQuery(Mockito.anyString())).thenReturn(embedding);
         when(repository.findClosestPublishedProducts(any(), anyInt())).thenReturn(List.of(
@@ -61,7 +61,7 @@ class ProductMatchingServiceTest {
 
     @Test
     void recommendProducts_retourneUneListeVideSiVoyageEchoue() {
-        SkinAnalysisResult analysis = new SkinAnalysisResult(Map.of("rougeurs", 30), "Peau sensible.");
+        SkinAnalysisResult analysis = new SkinAnalysisResult(true, Map.of("rougeurs", 30), "Peau sensible.");
         when(voyageClient.embedQuery(Mockito.anyString())).thenThrow(new RuntimeException("Voyage indisponible"));
 
         List<Long> ids = service.recommendProducts(analysis);
@@ -74,7 +74,7 @@ class ProductMatchingServiceTest {
 
     @Test
     void recommendProducts_retourneUneListeVideSiLaRechercheEchoue() {
-        SkinAnalysisResult analysis = new SkinAnalysisResult(Map.of("rougeurs", 30), "Peau sensible.");
+        SkinAnalysisResult analysis = new SkinAnalysisResult(true, Map.of("rougeurs", 30), "Peau sensible.");
         when(voyageClient.embedQuery(Mockito.anyString())).thenReturn(new float[]{0.1f});
         when(repository.findClosestPublishedProducts(any(), anyInt()))
                 .thenThrow(new RuntimeException("shop_ingredient_embeddings absente"));
