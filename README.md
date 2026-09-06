@@ -82,3 +82,17 @@ curl http://localhost:8080/diagnostics
 La premiere commande cree une ligne dans Neon et publie un evenement RabbitMQ
 (visible dans les logs du serveur, cote listener) ; la seconde liste les lignes
 enregistrees. `curl http://localhost:8080/hello` fonctionne toujours aussi.
+
+## Scan de secrets (gitleaks)
+
+Garde-fou contre le commit accidentel de clés API / tokens.
+
+```bash
+# Une fois par clone :
+git config core.hooksPath .githooks
+```
+
+Le hook `pre-commit` lance `gitleaks git --staged` et bloque le commit si un
+secret est détecté (`git commit --no-verify` pour forcer). Même scan en CI sur
+chaque push / PR (`.github/workflows/gitleaks.yml`), sur l'historique complet.
+Faux positifs éventuels à déclarer dans `.gitleaks.toml`.
