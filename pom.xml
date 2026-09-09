@@ -84,5 +84,16 @@
                 <targetPath>contracts</targetPath>
             </resource>
         </resources>
+        <plugins>
+            <plugin>
+                <!-- Sans ce plugin, `mvn package` ne produit qu'un jar "thin" (les
+                     classes du projet seules, sans les dependances) - inutilisable
+                     en `java -jar` standalone (ex. Azure App Service). Le goal
+                     `repackage` genere le jar executable Spring Boot (classes +
+                     dependances + manifest Main-Class). -->
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
     </build>
 </project>
