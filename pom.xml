@@ -16,6 +16,9 @@
     <description>Moteur IA semantique et RAG pour boutique e-commerce</description>
     <properties>
         <java.version>21</java.version>
+        <sonar.projectKey>NF31_kbeauty-ai-core-service</sonar.projectKey>
+        <sonar.organization>nf31</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
     <dependencies>
         <dependency>
@@ -93,6 +96,11 @@
                      dependances + manifest Main-Class). -->
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>4.0.0.4121</version>
             </plugin>
         </plugins>
     </build>
