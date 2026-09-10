@@ -24,10 +24,23 @@ jobs:
     - name: Build with Maven
       run: mvn clean install
 
+    # Le package deploye contient le jar applicatif (app.jar a la racine, nom
+    # attendu par le conteneur Java SE d'Azure App Service) + l'agent APM New
+    # Relic dans un sous-dossier. L'agent est active cote Azure via le reglage
+    # JAVA_TOOL_OPTIONS=-javaagent:/home/site/wwwroot/newrelic/newrelic.jar
+    # (cle de licence et nom d'appli fournis par les app settings NEW_RELIC_*).
+    - name: Stage deployment package with New Relic agent
+      run: |
+        mkdir -p deploy
+        curl -sfL -o /tmp/newrelic-java.zip https://download.newrelic.com/newrelic/java-agent/newrelic-agent/current/newrelic-java.zip
+        unzip -oq /tmp/newrelic-java.zip -d deploy
+        cp target/*.jar deploy/app.jar
+        ls -R deploy
+
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
-      with: 
+      with:
         app-name: 'kbeauty-ai-core'
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_4405b662f3b24003a677123948f21104 }}
-        package: '${{ github.workspace }}/target/*.jar'
+        package: '${{ github.workspace }}/deploy'
