@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.1</version>
+        <version>3.5.16</version>
         <relativePath/>
     </parent>
     <groupId>com.kbeauty</groupId>
@@ -15,7 +15,7 @@
     <name>ai-core-service</name>
     <description>Moteur IA semantique et RAG pour boutique e-commerce</description>
     <properties>
-        <java.version>21</java.version>
+        <java.version>25</java.version>
         <sonar.projectKey>NF31_kbeauty-ai-core-service</sonar.projectKey>
         <sonar.organization>nf31</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
@@ -32,6 +32,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
+            <version>42.7.12</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
