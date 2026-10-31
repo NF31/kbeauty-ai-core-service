@@ -1,7 +1,9 @@
 # kbeauty-ai-core-service
 
-Microservice Java/Spring Boot — Phase 2 de la roadmap montee en competence
-(voir kbeauty-shop/docs/montee-competence/ROADMAP.md).
+Microservice Java/Spring Boot de l'écosystème [kbeauty-shop](https://github.com/NF31/kbeauty-shop) :
+diagnostic de peau à partir d'une photo (API vision de Claude), demandes persistées en
+PostgreSQL et événements publiés sur RabbitMQ. Phase 2 de la roadmap de montée en compétence
+(voir [ROADMAP.md](https://github.com/NF31/kbeauty-shop/blob/main/docs/montee-competence/ROADMAP.md)).
 
 ## Concepts de base (pour quelqu'un qui vient de PHP/Laravel)
 
@@ -53,35 +55,27 @@ Journal pedagogique detaille (une entree par etape) dans [`docs/`](docs/README.m
   [docs/06-resilience-anthropic.md](docs/06-resilience-anthropic.md).
 - Encore a faire : contrat OpenAPI/Swagger (Springdoc) — seul item Phase 2 restant.
 
-## Comment lancer le serveur (a faire toi-meme dans le terminal WSL)
+## Lancer le service
 
-Prerequis : `kbeauty_rabbitmq` demarre (`docker start kbeauty_rabbitmq`, voir
-`kbeauty-ecosystem/docker-compose.yml`) et `application.properties` rempli avec
-les credentials Neon (copier `application.properties.example`, jamais commit).
+Prérequis :
+
+- RabbitMQ démarré (`docker compose up -d rabbitmq` dans
+  [kbeauty-ecosystem](https://github.com/NF31/kbeauty-ecosystem)) ;
+- `src/main/resources/application.properties` créé depuis
+  `application.properties.example`, avec les accès PostgreSQL (Neon) et la clé
+  Anthropic. Ce fichier n'est jamais commité.
 
 ```bash
-cd ~/projects/kbeauty-ai-core-service
 mvn spring-boot:run
 ```
 
-Ca va afficher pas mal de logs Spring Boot (normal), et se terminer par une
-ligne du style :
-
-```
-Started AiCoreServiceApplication in X.XXX seconds
-```
-
-Le serveur tourne alors sur le port 8080 par defaut (Spring Boot). Laisse ce
-terminal ouvert (Ctrl+C pour arreter), et dans un AUTRE terminal WSL, teste :
+Le service écoute sur le port 8080 :
 
 ```bash
-curl -X POST http://localhost:8080/diagnostics
-curl http://localhost:8080/diagnostics
+curl -X POST http://localhost:8080/diagnostics   # crée une demande et publie diagnostic.created
+curl http://localhost:8080/diagnostics           # liste les demandes enregistrées
+curl http://localhost:8080/hello                 # route de santé
 ```
-
-La premiere commande cree une ligne dans Neon et publie un evenement RabbitMQ
-(visible dans les logs du serveur, cote listener) ; la seconde liste les lignes
-enregistrees. `curl http://localhost:8080/hello` fonctionne toujours aussi.
 
 ## Scan de secrets (gitleaks)
 
