@@ -1,9 +1,9 @@
 # kbeauty-ai-core-service
 
-Microservice Java/Spring Boot de l'écosystème [kbeauty-shop](https://github.com/NF31/kbeauty-shop) :
+Microservice Java/Spring Boot de l'écosystème kbeauty-shop (dépôt privé) :
 diagnostic de peau à partir d'une photo (API vision de Claude), demandes persistées en
 PostgreSQL et événements publiés sur RabbitMQ. Phase 2 de la roadmap de montée en compétence
-(voir [ROADMAP.md](https://github.com/NF31/kbeauty-shop/blob/main/docs/montee-competence/ROADMAP.md)).
+(voir [ROADMAP.md](https://github.com/NF31/kbeauty-ecosystem/blob/main/docs/montee-competence/ROADMAP.md)).
 
 ## Concepts de base (pour quelqu'un qui vient de PHP/Laravel)
 
